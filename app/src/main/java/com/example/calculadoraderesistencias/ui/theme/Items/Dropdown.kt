@@ -18,19 +18,24 @@ import androidx.compose.ui.unit.sp
 import com.example.calculadoraderesistencias.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
+
+// Listas con los colores disponibles para cada banda
 val colores1y2 = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo", "Verde", "Azul", "Violeta", "Gris", "Blanco")
 val colores3 = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo")
 val colores4 = listOf("Dorado", "Plateado", "Ninguno")
 
 @Composable
 fun SistemaConDropdowns() {
+    // Variables para guardar la selección de cada banda de color
     var seleccion1 by remember { mutableStateOf("Selecciona") }
     var seleccion2 by remember { mutableStateOf("Selecciona") }
     var seleccion3 by remember { mutableStateOf("Selecciona") }
     var seleccion4 by remember { mutableStateOf("Selecciona") }
 
+    // Variable para almacenar el resultado del cálculo de la resistencia
     var resultadoResistencia by remember { mutableStateOf("") }
 
+    // Layout principal en forma de columna centrada
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,6 +43,7 @@ fun SistemaConDropdowns() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Imagen del logo (opcional)
         Image(
             painter = painterResource(id = R.drawable.log),
             contentDescription = "Logo",
@@ -45,6 +51,8 @@ fun SistemaConDropdowns() {
                 .size(140.dp)
                 .padding(bottom = 24.dp)
         )
+
+        // Título principal
         Text(
             text = "Calculadora de Resistencias",
             fontSize = 24.sp,
@@ -53,6 +61,7 @@ fun SistemaConDropdowns() {
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
+        // Cuatro dropdowns para seleccionar los colores de cada banda
         ColorDropdown("Banda 1", seleccion1, colores1y2) { seleccion1 = it }
         Spacer(modifier = Modifier.height(16.dp))
         ColorDropdown("Banda 2", seleccion2, colores1y2) { seleccion2 = it }
@@ -62,9 +71,11 @@ fun SistemaConDropdowns() {
         ColorDropdown("Tolerancia", seleccion4, colores4) { seleccion4 = it }
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Botón que ejecuta el cálculo de la resistencia
         Button(
             onClick = {
-                // Aquí irá el cálculo de la resistencia
+                // Aquí se llama la función de cálculo
+
             },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -74,6 +85,7 @@ fun SistemaConDropdowns() {
             Text("Calcular Resistencia", fontSize = 16.sp)
         }
 
+        // Muestra el resultado si no está vacío
         if (resultadoResistencia.isNotEmpty()) {
             Text(
                 text = "Resultado: $resultadoResistencia",
@@ -88,14 +100,15 @@ fun SistemaConDropdowns() {
 
 @Composable
 fun ColorDropdown(
-    label: String,
-    seleccion: String,
-    opciones: List<String>,
-    onSeleccionar: (String) -> Unit
+    label: String,                 // Etiqueta del dropdown
+    seleccion: String,            // Valor seleccionado
+    opciones: List<String>,       // Lista de colores disponibles
+    onSeleccionar: (String) -> Unit // Callback para actualizar selección
 ) {
-    var expandir by remember { mutableStateOf(false) }
+    var expandir by remember { mutableStateOf(false) } // Controla si el dropdown está abierto
 
     Column(modifier = Modifier.fillMaxWidth()) {
+        // Etiqueta del dropdown con ícono
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 4.dp)
@@ -110,6 +123,7 @@ fun ColorDropdown(
             Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         }
 
+        // Caja principal del dropdown
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,6 +137,7 @@ fun ColorDropdown(
                 Text(text = "▼", fontSize = 14.sp)
             }
 
+            // Menú desplegable con opciones
             DropdownMenu(
                 expanded = expandir,
                 onDismissRequest = { expandir = false },
@@ -132,6 +147,7 @@ fun ColorDropdown(
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Círculo de color representativo
                                 Box(
                                     modifier = Modifier
                                         .size(16.dp)
@@ -142,8 +158,8 @@ fun ColorDropdown(
                             }
                         },
                         onClick = {
-                            onSeleccionar(opcion)
-                            expandir = false
+                            onSeleccionar(opcion) // Actualiza la selección
+                            expandir = false       // Cierra el menú
                         }
                     )
                 }
@@ -151,6 +167,8 @@ fun ColorDropdown(
         }
     }
 }
+
+// Función que convierte el nombre del color en un Color visual
 fun colorFromName(name: String): Color = when (name.lowercase()) {
     "negro" -> Color.Black
     "marrón" -> Color(0xFFA52A2A)
