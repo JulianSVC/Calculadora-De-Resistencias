@@ -1,4 +1,5 @@
 package com.example.calculadoraderesistencias.ui.theme.Items
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +19,13 @@ import androidx.compose.ui.unit.sp
 import com.example.calculadoraderesistencias.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 // Listas con los colores disponibles para cada banda
 val colores1y2 = listOf("Negro", "Marrón", "Rojo", "Naranja", "Amarillo", "Verde", "Azul", "Violeta", "Gris", "Blanco")
@@ -39,7 +47,8 @@ fun SistemaConDropdowns() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -75,7 +84,7 @@ fun SistemaConDropdowns() {
         Button(
             onClick = {
                 // Aquí se llama la función de cálculo
-
+                resultadoResistencia = calcularResistencia(seleccion1, seleccion2, seleccion3, seleccion4)
             },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
@@ -84,18 +93,17 @@ fun SistemaConDropdowns() {
         ) {
             Text("Calcular Resistencia", fontSize = 16.sp)
         }
+        // Animación de aparición del resultado
 
-        // Muestra el resultado si no está vacío
-        if (resultadoResistencia.isNotEmpty()) {
-            Text(
-                text = "Resultado: $resultadoResistencia",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.DarkGray,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+        Spacer(modifier = Modifier.height(24.dp))
+        AnimatedVisibility(
+            visible = resultadoResistencia.isNotEmpty(),
+            enter = fadeIn(animationSpec = tween(800)) + scaleIn(initialScale = 0.8f, animationSpec = tween(800)),
+            exit = fadeOut(animationSpec = tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300))
+        ) {
+            ResultadoCard(resultadoResistencia)
         }
-    }
+   }
 }
 
 @Composable
@@ -185,3 +193,56 @@ fun colorFromName(name: String): Color = when (name.lowercase()) {
     "ninguno" -> Color.LightGray
     else -> Color.LightGray
 }
+@Composable
+fun ResultadoCard(resultado: String) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEEF7FF)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Resultado",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = resultado,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF1E88E5)
+            )
+        }
+    }
+}
+
+fun calcularResistencia(
+    banda1: String,
+    banda2: String,
+    banda3: String,
+    banda4: String
+): String {
+    val b1 = mapaColores[banda1]?.valor ?: return "Error: Banda 1 no válida"
+    val b2 = mapaColores[banda2]?.valor ?: return "Error: Banda 2 no válida"
+    val multiplicador = mapaColores[banda3]?.multiplicador ?: return "Error: Banda 3 no válida"
+    val tolerancia = mapaColores[banda4]?.tolerancia ?: ""
+
+    val valorBase = (b1 * 10 + b2) * multiplicador
+
+    val resultado = when {
+        valorBase >= 1_000_000 -> "${valorBase / 1_000_000} MΩ"
+        valorBase >= 1_000 -> "${valorBase / 1_000} kΩ"
+        else -> "$valorBase Ω"
+    }
+
+    return if (tolerancia.isNotEmpty()) "$resultado $tolerancia" else resultado
+}
+
